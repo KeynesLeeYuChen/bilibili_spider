@@ -21,6 +21,17 @@ def LoadUserAgent(uafile):
 
 uas = LoadUserAgent("user_agents.txt")
 
+def LoadProxies(uafile):
+    ips = []
+    with open(uafile,'r') as proxies:
+        for ip in proxies.readlines():
+            if ip:
+                ips.append(ua.strip())
+    random.shuffle(ips)
+    return ips
+
+ips = LoadProxies("proxies.txt")
+
 def getHtmlInfo(url):
     ua = random.choice(uas)
     headers = {
@@ -67,9 +78,12 @@ def save_db():
 
 if __name__ == '__main__':
     pool = Pool()
-    for i in range(70000,20000000):
-        urls = ['https://api.bilibili.com/x/web-interface/archive/stat?aid={}'.format(j) for j in range(begin,begin+10000)]
-        urls = 'https://api.bilibili.com/x/web-interface/archive/stat?aid={}'.format(i)
+    for i in range(1,2000):
+        elem = (i-1)*10000
+        urls = ['https://api.bilibili.com/x/web-interface/archive/stat?aid={}'.format(j) for j in range(elem,elem+10000)]
+        #urls = 'https://api.bilibili.com/x/web-interface/archive/stat?aid={}'.format(i)
         pool.map(getHtmlInfo, urls)
+        pool.close()
+        pool.join()
 
     conn.close()
